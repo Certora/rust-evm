@@ -67,6 +67,22 @@ define_language! {
   }
 }
 
+impl EVM {
+  pub fn new(n: U256) -> Self {
+      EVM::Num(WrappedU256 { value: n })
+  }
+
+  pub fn from_u64(n: u64) -> Self {
+      EVM::Num(WrappedU256 { value : U256::from_dec_str(&n.to_string()).unwrap() })
+  }
+}
+
+impl From<U256> for EVM {
+  fn from(t: U256) -> Self {
+      Self::new(t)
+  }
+}
+
 fn u256_to_bool(u: U256) -> bool {
   u != U256::zero()
 }
