@@ -3,6 +3,7 @@ use core::cmp::Ordering;
 use core::ops::{Div, Rem};
 use primitive_types::U256;
 
+
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Sign {
 	Plus,
@@ -132,9 +133,10 @@ impl Rem for I256 {
 
 #[cfg(test)]
 mod tests {
-	use crate::utils::{Sign, I256};
+	use crate::evm_utils::{Sign, I256};
 	use primitive_types::U256;
 	use std::num::Wrapping;
+
 
 	#[test]
 	fn div_i256() {
