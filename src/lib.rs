@@ -96,6 +96,8 @@ fn bool_to_u256(b: bool) -> U256 {
 }
 
 
+// This function should only return None for variables
+// and when we get the wrong number of arguments
 pub fn eval_evm(
   op: &EVM,
   first: Option<U256>,
@@ -132,7 +134,7 @@ pub fn eval_evm(
 
       EVM::LNot(_) => bool_to_u256(!u256_to_bool(first?)),
       EVM::BWNot(_) => evm_ops::not(first?),
-      EVM::Exp(_) => None?,
+      EVM::Exp(_) => evm_ops::exp(first?, second?),
       EVM::Apply(_) => None?
   })
 }

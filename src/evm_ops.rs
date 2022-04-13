@@ -1,8 +1,24 @@
 use primitive_types::U256;
-use crate::evm_utils::{Sign, I256};
+use crate::evm_utils::{I256};
 
 // Select functions from the evm_core rust library
 
+#[inline]
+pub fn exp(op1: U256, op2: U256) -> U256 {
+	let mut op1 = op1;
+	let mut op2 = op2;
+	let mut r: U256 = 1.into();
+
+	while op2 != 0.into() {
+		if op2 & 1.into() != 0.into() {
+			r = r.overflowing_mul(op1).0;
+		}
+		op2 >>= 1;
+		op1 = op1.overflowing_mul(op1).0;
+	}
+
+	r
+}
 
 #[inline]
 pub fn div(op1: U256, op2: U256) -> U256 {
