@@ -131,7 +131,6 @@ pub fn eval_evm(
       EVM::Add(_) => first?.overflowing_add(second?).0,
       EVM::Mul(_) => first?.overflowing_mul(second?).0,
 
-
       EVM::LNot(_) => bool_to_u256(!u256_to_bool(first?)),
       EVM::BWNot(_) => evm_ops::not(first?),
       EVM::Exp(_) => evm_ops::exp(first?, second?),
