@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 primitive-types = "0.10.1"
-egg = "0.9.0"
+egg = { git = "ssh://git@github.com/egraphs-good/egg", rev = "9ac59c3ba2d9bf61e4b228e2936f42d5e43f78f7" }
 
 
 #[dependencies.egg]
