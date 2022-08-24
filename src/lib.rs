@@ -109,8 +109,8 @@ pub fn eval_evm(
 
       EVM::Sub(_) => first?.overflowing_sub(second?).0,
       EVM::Div(_) => evm_ops::div(first?, second?),
-      EVM::BWAnd(_) => first?.bitor(second?),
-      EVM::BWOr(_) => first?.bitand(second?),
+      EVM::BWAnd(_) => first?.bitand(second?),
+      EVM::BWOr(_) => first?.bitor(second?),
       EVM::ShiftLeft(_) => evm_ops::shl(first?, second?),
       EVM::ShiftRight(_) => evm_ops::shr(first?, second?),
 
