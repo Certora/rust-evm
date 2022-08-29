@@ -31,7 +31,7 @@ impl Display for WrappedU256 {
 }
 
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Copy)]
 pub enum Constant {
     Bool(bool),
     Num(U256),
