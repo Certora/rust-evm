@@ -1,7 +1,7 @@
 use core::ops::{BitAnd};
 mod evm_ops;
 pub mod evm_utils;
-use egg::{define_language, Id};
+use egg::{define_language, Id, Symbol};
 use primitive_types::U256;
 use std::ops::*;
 
@@ -31,6 +31,97 @@ impl Display for WrappedU256 {
 }
 
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum Constant {
+    Bool(bool),
+    Num(U256),
+}
+
+
+impl fmt::Display for Constant {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+      match self {
+          Constant::Bool(b) => b.fmt(f),
+          Constant::Num(i) => i.fmt(f),
+      }
+  }
+}
+
+impl std::str::FromStr for Constant {
+  type Err = ();
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+      if let Ok(i) = U256::from_dec_str(s) {
+          Ok(Self::Num(i))
+      } else if let Ok(b) = bool::from_str(s) {
+          Ok(Self::Bool(b))
+      } else {
+          Err(())
+      }
+  }
+}
+
+impl Constant {
+  fn to_num(&self) -> Option<U256> {
+      match self {
+          Constant::Num(n) => Some(n.clone()),
+          Constant::Bool(_) => None,
+      }
+  }
+
+  fn to_bool(&self) -> Option<bool> {
+      match self {
+          Constant::Bool(b) => Some(*b),
+          Constant::Num(_) => None,
+      }
+  }
+}
+
+
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct BoolVar(pub egg::Symbol);
+
+impl Display for BoolVar {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    let BoolVar(v) = self;
+    write!(f, "{}", v)
+  }
+}
+
+impl FromStr for BoolVar {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.starts_with("bool") {
+            Ok(BoolVar(Symbol::from(s)))
+        } else {
+            Err(())
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct BitVar(pub egg::Symbol);
+
+impl Display for BitVar {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    let BitVar(v) = self;
+    write!(f, "{}", v)
+  }
+}
+
+
+impl FromStr for BitVar {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.starts_with("bit256") {
+            Ok(BitVar(Symbol::from(s)))
+        } else {
+            Err(())
+        }
+    }
+}
 
 define_language! {
   pub enum EVM {
@@ -40,6 +131,7 @@ define_language! {
       "|" = BWOr([Id; 2]),
       "<<" = ShiftLeft([Id; 2]),
       ">>" = ShiftRight([Id; 2]),
+
       "||" = LOr([Id; 2]),
       "&&" = LAnd([Id; 2]),
 
@@ -47,8 +139,10 @@ define_language! {
       ">=" = Ge([Id; 2]),
       "<" = Lt([Id; 2]),
       "<=" = Le([Id; 2]),
-      "==" = Eq([Id; 2]),
+      "bool==" = BoolEq([Id; 2]),
+      "bit==" = BitEq([Id; 2]),
       "s<" = Slt([Id; 2]),
+
       "s<=" = Sle([Id; 2]),
       "s>" = Sgt([Id; 2]),
       "s>=" = Sge([Id; 2]),
@@ -58,22 +152,25 @@ define_language! {
 
       "!" = LNot([Id; 1]),
       "~" = BWNot([Id; 1]),
+
       "exp" = Exp([Id; 2]),
 
-      "apply" = Apply(Box<[Id]>),
+      "bitif" = BitIte([Id; 3]),
+      "boolif" = BoolIte([Id; 3]),
 
-      Num(WrappedU256),
-      Var(egg::Symbol),
+      Constant(Constant),
+      BoolVar(BoolVar),
+      BitVar(BitVar),
   }
 }
 
 impl EVM {
   pub fn new(n: U256) -> Self {
-      EVM::Num(WrappedU256 { value: n })
+    EVM::Constant(Constant::Num(n))
   }
 
   pub fn from_u64(n: u64) -> Self {
-      EVM::Num(WrappedU256 { value : U256::from_dec_str(&n.to_string()).unwrap() })
+    EVM::Constant(Constant::Num(U256::from_dec_str(&n.to_string()).unwrap()))
   }
 }
 
@@ -83,57 +180,64 @@ impl From<U256> for EVM {
   }
 }
 
-fn u256_to_bool(u: U256) -> bool {
-  u != U256::zero()
+impl From<bool> for EVM {
+  fn from(t: bool) -> Self {
+    EVM::Constant(Constant::Bool(t))
+  }
 }
 
-fn bool_to_u256(b: bool) -> U256 {
-  if b {
-      U256::one()
-  } else {
-      U256::zero()
-  }   
+impl From<Constant> for EVM {
+  fn from(t: Constant) -> Self {
+    EVM::Constant(t)
+  }
 }
-
 
 // This function should only return None for variables
 // and when we get the wrong number of arguments
 pub fn eval_evm(
   op: &EVM,
-  first: Option<U256>,
-  second: Option<U256>,
-) -> Option<U256> {
+  first: Option<Constant>,
+  second: Option<Constant>,
+  third: Option<Constant>,
+) -> Option<Constant> {
   Some(match op {
-      EVM::Num(n) => n.value,
-      EVM::Var(_) => None?,
+      EVM::Constant(c) => c.clone(),
+      EVM::BitVar(_) => None?,
+      EVM::BoolVar(_) => None?,
 
-      EVM::Sub(_) => first?.overflowing_sub(second?).0,
-      EVM::Div(_) => evm_ops::div(first?, second?),
-      EVM::BWAnd(_) => first?.bitand(second?),
-      EVM::BWOr(_) => first?.bitor(second?),
-      EVM::ShiftLeft(_) => evm_ops::shl(first?, second?),
-      EVM::ShiftRight(_) => evm_ops::shr(first?, second?),
+      EVM::Sub(_) => Constant::Num(first?.to_num()?.overflowing_sub(second?.to_num()?).0),
+      EVM::Div(_) => Constant::Num(evm_ops::div(first?.to_num()?, second?.to_num()?)),
+      EVM::BWAnd(_) => Constant::Num(first?.to_num()?.bitand(second?.to_num()?)),
+      EVM::BWOr(_) => Constant::Num(first?.to_num()?.bitor(second?.to_num()?)),
+      EVM::ShiftLeft(_) => Constant::Num(evm_ops::shl(first?.to_num()?, second?.to_num()?)),
+      EVM::ShiftRight(_) => Constant::Num(evm_ops::shr(first?.to_num()?, second?.to_num()?)),
 
-      EVM::LOr(_) => bool_to_u256(u256_to_bool(first?) || u256_to_bool(second?)),
-      EVM::LAnd(_) => bool_to_u256(u256_to_bool(first?) && u256_to_bool(second?)),
+      EVM::LOr(_) => Constant::Bool(first?.to_bool()? || second?.to_bool()?),
+      EVM::LAnd(_) => Constant::Bool(first?.to_bool()? && second?.to_bool()?),
 
-      EVM::Gt(_) => bool_to_u256(first?.gt(&second?)),
-      EVM::Ge(_) => bool_to_u256(first?.ge(&second?)),
-      EVM::Lt(_) => bool_to_u256(first?.lt(&second?)),
-      EVM::Le(_) => bool_to_u256(first?.le(&second?)),
-      EVM::Eq(_) => bool_to_u256(first?.eq(&second?)),
+      EVM::Gt(_) => Constant::Bool(first?.to_num()?.gt(&second?.to_num()?)),
+      EVM::Ge(_) => Constant::Bool(first?.to_num()?.ge(&second?.to_num()?)),
+      EVM::Lt(_) => Constant::Bool(first?.to_num()?.lt(&second?.to_num()?)),
+      EVM::Le(_) => Constant::Bool(first?.to_num()?.le(&second?.to_num()?)),
+      EVM::BoolEq(_) => Constant::Bool(first?.eq(&second?)),
+      EVM::BitEq(_) => Constant::Bool(first?.eq(&second?)),
+      
 
-      EVM::Slt(_) => evm_ops::slt(first?, second?),
-      EVM::Sle(_) => if first? == second? { bool_to_u256(true) } else {evm_ops::slt(first?, second?)},
-      EVM::Sgt(_) => evm_ops::sgt(first?, second?),
-      EVM::Sge(_) => if first? == second? { bool_to_u256(true) } else {evm_ops::sgt(first?, second?)},
+      EVM::Slt(_) => Constant::Bool(evm_ops::slt(first?.to_num()?, second?.to_num()?) == U256::one()),
+      EVM::Sle(_) => Constant::Bool(if first.clone()?.to_num()? == second.clone()?.to_num()? { true } 
+      else
+      {evm_ops::slt(first?.to_num()?, second?.to_num()?) == U256::one()}),
+      EVM::Sgt(_) => Constant::Bool(evm_ops::sgt(first?.to_num()?, second?.to_num()?) == U256::one()),
+      EVM::Sge(_) => Constant::Bool(if first.clone()?.to_num()? == second.clone()?.to_num()? { true } else {evm_ops::sgt(first?.to_num()?, second?.to_num()?) == U256::one()}),
 
-      EVM::Add(_) => first?.overflowing_add(second?).0,
-      EVM::Mul(_) => first?.overflowing_mul(second?).0,
+      EVM::Add(_) => Constant::Num(first?.to_num()?.overflowing_add(second?.to_num()?).0),
+      EVM::Mul(_) => Constant::Num(first?.to_num()?.overflowing_mul(second?.to_num()?).0),
 
-      EVM::LNot(_) => bool_to_u256(!u256_to_bool(first?)),
-      EVM::BWNot(_) => evm_ops::not(first?),
-      EVM::Exp(_) => evm_ops::exp(first?, second?),
-      EVM::Apply(_) => None?
+      EVM::LNot(_) => Constant::Bool(!first?.to_bool()?),
+      EVM::BWNot(_) => Constant::Num(evm_ops::not(first?.to_num()?)),
+      EVM::Exp(_) => Constant::Num(evm_ops::exp(first?.to_num()?, second?.to_num()?)),
+
+      EVM::BitIte(_) => Constant::Num(if first?.to_bool()? { second?.to_num()? } else { third?.to_num()? }),
+      EVM::BoolIte(_) => Constant::Bool(if first?.to_bool()? { second?.to_bool()? } else { third?.to_bool()? }),
   })
 }
