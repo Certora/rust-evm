@@ -14,6 +14,11 @@ pub enum Constant {
     Num(U256),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum Type {
+  Bool, 
+  Bit256,
+}
 
 impl fmt::Display for Constant {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -148,6 +153,46 @@ impl EVM {
 
   pub fn from_u64(n: u64) -> Self {
     EVM::Constant(Constant::Num(U256::from_dec_str(&n.to_string()).unwrap()))
+  }
+
+  pub fn type_of(&self) -> Type {
+    match self {
+      EVM::Sub(_) => Type::Bit256,
+      EVM::Div(_) => Type::Bit256,
+      EVM::BWAnd(_)=> Type::Bit256,
+      EVM::BWOr(_)=> Type::Bit256,
+      EVM::ShiftLeft(_)=> Type::Bit256,
+      EVM::ShiftRight(_)=> Type::Bit256,
+
+      EVM::LOr(_)=> Type::Bool,
+      EVM::LAnd(_)=> Type::Bool,
+
+      EVM::Gt(_)=> Type::Bool,
+      EVM::Ge(_)=> Type::Bool,
+      EVM::Lt(_)=> Type::Bool,
+      EVM::Le(_)=> Type::Bool,
+      EVM::BoolEq(_)=> Type::Bool,
+      EVM::BitEq(_) => Type::Bool,
+      EVM::Slt(_)=> Type::Bool,
+      EVM::Sle(_)=> Type::Bool,
+      EVM::Sgt(_)=> Type::Bool,
+      EVM::Sge(_)=> Type::Bool,
+
+      EVM::Add(_)=> Type::Bit256,
+      EVM::Mul(_)=> Type::Bit256,
+
+      EVM::LNot(_)=> Type::Bool,
+      EVM::BWNot(_)=> Type::Bit256,
+      EVM::Exp(_)=> Type::Bit256,
+
+      EVM::BitIte(_)=> Type::Bit256,
+      EVM::BoolIte(_)=> Type::Bool,
+
+      EVM::Constant(Constant::Bool(_)) => Type::Bool,
+      EVM::Constant(Constant::Num(_)) => Type::Bit256,
+      EVM::BoolVar(_)=> Type::Bool,
+      EVM::BitVar(_)=> Type::Bit256,
+    }
   }
 }
 
