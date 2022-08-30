@@ -8,29 +8,6 @@ use std::ops::*;
 use std::str::FromStr;
 use std::fmt::{self, Display};
 
-#[derive(Debug, Clone, PartialOrd, Ord, Eq, PartialEq, Hash)]
-pub struct WrappedU256 {
-    pub value: U256,
-}
-
-impl FromStr for WrappedU256 {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match U256::from_dec_str(s) {
-            Ok(v) => Ok(WrappedU256 { value: v }),
-            Err(_) => Err(()),
-        }
-    }
-}
-
-impl Display for WrappedU256 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self.value)
-    }
-}
-
-
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Copy)]
 pub enum Constant {
     Bool(bool),
@@ -115,7 +92,7 @@ impl FromStr for BitVar {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.starts_with("bit256") {
+        if s.starts_with("bv256") {
             Ok(BitVar(Symbol::from(s)))
         } else {
             Err(())
