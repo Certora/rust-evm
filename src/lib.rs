@@ -20,6 +20,15 @@ pub enum Type {
   Bit256,
 }
 
+impl fmt::Display for Type {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+        Type::Bool => "bool".fmt(f),
+        Type::Bit256 => "bv256".fmt(f),
+    }
+}
+}
+
 impl fmt::Display for Constant {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
       match self {
