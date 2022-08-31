@@ -155,7 +155,7 @@ impl EVM {
     EVM::Constant(Constant::Num(U256::from_dec_str(&n.to_string()).unwrap()))
   }
 
-  pub fn typeof(&self) -> Type {
+  pub fn type_of(&self) -> Type {
     match self {
       EVM::Sub(_) => Type::Bit256,
       EVM::Div(_) => Type::Bit256,
