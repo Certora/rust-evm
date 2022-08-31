@@ -20,16 +20,6 @@ pub enum Type {
   Bit256,
 }
 
-impl std::fmt::Display for Type {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-      match self {
-          Type::Bool => write!(f, "bool"),
-          Type::Bit256 => write!(f, "bit256"),
-      }
-  }
-}
-
-
 impl fmt::Display for Constant {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
       match self {
@@ -165,7 +155,7 @@ impl EVM {
     EVM::Constant(Constant::Num(U256::from_dec_str(&n.to_string()).unwrap()))
   }
 
-  pub fn type_of(&self) -> Type {
+  pub fn typeof(&self) -> Type {
     match self {
       EVM::Sub(_) => Type::Bit256,
       EVM::Div(_) => Type::Bit256,
