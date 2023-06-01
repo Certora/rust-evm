@@ -16,7 +16,7 @@ pub enum Constant {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Type {
-  Bool, 
+  Bool,
   Bit256,
 }
 
@@ -148,7 +148,26 @@ define_language! {
 
       "bitif" = BitIte([Id; 3]),
       "boolif" = BoolIte([Id; 3]),
-
+      "smul_no_ofl_udfl" = NoSMulOverAndUnderflowCheck(Box<[Id]>),
+      "add_noofl" = NoAddOverflowCheck(Box<[Id]>),
+      "add_must_ofl" = AddMustOverflowCheck(Box<[Id]>),
+      "mul_noofl" = NoMulOverflowCheck(Box<[Id]>),
+      "smul_noofl" = NoSMulOverflowCheck(Box<[Id]>),
+      "smul_noudfl" = NoSMulUnderflowCheck(Box<[Id]>),
+      "ecrecover" = PrecompiledECRecover(Box<[Id]>),
+      "wrap_twos_complement" = TwosComplementWrap(Box<[Id]>),
+      "unwrap_twos_complement" = TwosComplementUnwrap(Box<[Id]>),
+      "skey_basic" = Basic(Box<[Id]>),
+      "skey_add" = Addition(Box<[Id]>),
+      "to_skey" = ToSkey(Box<[Id]>),
+      "from_skey" = FromSkey(Box<[Id]>),
+      "safe_math_promotion" = SafeMathPromotion(Box<[Id]>),
+      "safe_math_narrow" = SafeMathNarrow(Box<[Id]>),
+      "disjoint_sighashes" = DisjointSighashes(Box<[Id]>),
+      "link_library" = LinkContractAddress(Box<[Id]>),
+      "to_storage_key" = ToStorageKey(Box<[Id]>),
+      // TODO: Not sure what to do about "opaque_identity",
+      // TODO: Not sure what to do about "hash",
       Constant(Constant),
       BoolVar(BoolVar),
       BitVar(BitVar),
@@ -201,6 +220,7 @@ impl EVM {
       EVM::Constant(Constant::Num(_)) => Type::Bit256,
       EVM::BoolVar(_)=> Type::Bool,
       EVM::BitVar(_)=> Type::Bit256,
+      _ => Type::Bit256
     }
   }
 }
@@ -252,7 +272,6 @@ pub fn eval_evm(
       EVM::Le(_) => Constant::Bool(first?.to_num()?.le(&second?.to_num()?)),
       EVM::BoolEq(_) => Constant::Bool(first?.eq(&second?)),
       EVM::BitEq(_) => Constant::Bool(first?.eq(&second?)),
-      
 
       EVM::Slt(_) => Constant::Bool(evm_ops::slt(first?.to_num()?, second?.to_num()?) == U256::one()),
       EVM::Sle(_) => Constant::Bool(if first.clone()?.to_num()? == second.clone()?.to_num()? { true } 
@@ -270,5 +289,6 @@ pub fn eval_evm(
 
       EVM::BitIte(_) => Constant::Num(if first?.to_bool()? { second?.to_num()? } else { third?.to_num()? }),
       EVM::BoolIte(_) => Constant::Bool(if first?.to_bool()? { second?.to_bool()? } else { third?.to_bool()? }),
+      _ => None?,
   })
 }
