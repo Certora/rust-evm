@@ -61,6 +61,26 @@ define_language! {
       "exp" = Exp([Id; 2]),
 
       "apply" = Apply(Box<[Id]>),
+      "bitif" = BitIte([Id; 3]),
+      "boolif" = BoolIte([Id; 3]),
+      "smul_no_ofl_udfl" = NoSMulOverAndUnderflowCheck(Box<[Id]>),
+      "add_noofl" = NoAddOverflowCheck(Box<[Id]>),
+      "add_must_ofl" = AddMustOverflowCheck(Box<[Id]>),
+      "mul_noofl" = NoMulOverflowCheck(Box<[Id]>),
+      "smul_noofl" = NoSMulOverflowCheck(Box<[Id]>),
+      "smul_noudfl" = NoSMulUnderflowCheck(Box<[Id]>),
+      "ecrecover" = PrecompiledECRecover(Box<[Id]>),
+      "wrap_twos_complement" = TwosComplementWrap(Box<[Id]>),
+      "unwrap_twos_complement" = TwosComplementUnwrap(Box<[Id]>),
+      "skey_basic" = Basic(Box<[Id]>),
+      "skey_add" = Addition(Box<[Id]>),
+      "to_skey" = ToSkey(Box<[Id]>),
+      "from_skey" = FromSkey(Box<[Id]>),
+      "safe_math_promotion" = SafeMathPromotion(Box<[Id]>),
+      "safe_math_narrow" = SafeMathNarrow(Box<[Id]>),
+      "disjoint_sighashes" = DisjointSighashes(Box<[Id]>),
+      "link_library" = LinkContractAddress(Box<[Id]>),
+      "to_storage_key" = ToStorageKey(Box<[Id]>),
 
       Num(WrappedU256),
       Var(egg::Symbol),
@@ -134,6 +154,7 @@ pub fn eval_evm(
       EVM::LNot(_) => bool_to_u256(!u256_to_bool(first?)),
       EVM::BWNot(_) => evm_ops::not(first?),
       EVM::Exp(_) => evm_ops::exp(first?, second?),
-      EVM::Apply(_) => None?
+      EVM::Apply(_) => None?,
+      _ => None?
   })
 }
