@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 primitive-types = "0.10.1"
-egg = "0.7.1"
+egg = { git = "ssh://git@github.com/oflatt/egg", rev = "df6635fc11a05c0229faea0fdabd3fc4fa237a63" }
 
 
 #[dependencies.egg]

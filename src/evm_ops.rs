@@ -61,7 +61,7 @@ pub fn not(op1: U256) -> U256 {
 }
 
 #[inline]
-pub fn shl(shift: U256, value: U256) -> U256 {
+pub fn shl(value: U256, shift: U256) -> U256 {
 	if value == U256::zero() || shift >= U256::from(256) {
 		U256::zero()
 	} else {
@@ -71,7 +71,7 @@ pub fn shl(shift: U256, value: U256) -> U256 {
 }
 
 #[inline]
-pub fn shr(shift: U256, value: U256) -> U256 {
+pub fn shr(value: U256, shift: U256) -> U256 {
 	if value == U256::zero() || shift >= U256::from(256) {
 		U256::zero()
 	} else {
