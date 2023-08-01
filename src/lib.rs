@@ -220,6 +220,7 @@ impl EVM {
       EVM::Constant(Constant::Num(_)) => Type::Bit256,
       EVM::BoolVar(_)=> Type::Bool,
       EVM::BitVar(_)=> Type::Bit256,
+      _ => {},
     }
   }
 }
@@ -289,5 +290,6 @@ pub fn eval_evm(
 
       EVM::BitIte(_) => Constant::Num(if first?.to_bool()? { second?.to_num()? } else { third?.to_num()? }),
       EVM::BoolIte(_) => Constant::Bool(if first?.to_bool()? { second?.to_bool()? } else { third?.to_bool()? }),
+      _ => {},
   })
 }
