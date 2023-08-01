@@ -148,7 +148,8 @@ define_language! {
 
       "bitif" = BitIte([Id; 3]),
       "boolif" = BoolIte([Id; 3]),
-/*
+
+      "apply" = Apply(Box<[Id]>),
       "smul_no_ofl_udfl" = NoSMulOverAndUnderflowCheck(Box<[Id]>),
       "add_noofl" = NoAddOverflowCheck(Box<[Id]>),
       "add_must_ofl" = AddMustOverflowCheck(Box<[Id]>),
@@ -167,13 +168,13 @@ define_language! {
       "disjoint_sighashes" = DisjointSighashes(Box<[Id]>),
       "link_library" = LinkContractAddress(Box<[Id]>),
       "to_storage_key" = ToStorageKey(Box<[Id]>),
-*/
 
       Constant(Constant),
       BoolVar(BoolVar),
       BitVar(BitVar),
   }
 }
+
 
 impl EVM {
   pub fn new(n: U256) -> Self {
