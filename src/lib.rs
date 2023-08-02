@@ -61,6 +61,7 @@ define_language! {
       "exp" = Exp([Id; 2]),
 
       "apply" = Apply(Box<[Id]>),
+      "safe_math_narrow" = SafeMathNarrow(Box<[Id]>),
 
       Num(WrappedU256),
       Var(egg::Symbol),
@@ -134,6 +135,7 @@ pub fn eval_evm(
       EVM::LNot(_) => bool_to_u256(!u256_to_bool(first?)),
       EVM::BWNot(_) => evm_ops::not(first?),
       EVM::Exp(_) => evm_ops::exp(first?, second?),
-      EVM::Apply(_) => None?
+      EVM::Apply(_) => None?,
+      EVM::SafeMathNarrow(_) => None?
   })
 }
