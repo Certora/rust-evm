@@ -1,4 +1,5 @@
 use core::ops::{BitAnd};
+use std::hash::Hash;
 mod evm_ops;
 pub mod evm_utils;
 use egg::{define_language, Id};
@@ -61,7 +62,27 @@ define_language! {
       "exp" = Exp([Id; 2]),
 
       "apply" = Apply(Box<[Id]>),
+
       "safe_math_narrow" = SafeMathNarrow(Box<[Id]>),
+      "safe_math_promotion" = SafeMathPromotion(Box<[Id]>),
+      "smul_noofl" = SmulNoofl(Box<[Id]>),
+      "smul_noudfl" = SmulNoudfl(Box<[Id]>), 
+      "smul_no_ofl_udfl" = SmulNoOflUdfl(Box<[Id]>),
+      "hash" = Hash(Box<[Id]>),
+      "skey_add" = SkeyAdd(Box<[Id]>),
+      "skey_basic" = SkeyBasic(Box<[Id]>),
+      "unwrap_twos_complement" = UnwrapTwosComplement(Box<[Id]>),
+      "wrap_twos_complement" = WrapTwosComplement(Box<[Id]>),
+      "ecrecover" = Ecrecover(Box<[Id]>),
+      "opaque_identity" = OpaqueIdentity(Box<[Id]>),
+      "link_library" = LinkLibrary(Box<[Id]>),
+      "to_storage_key" = ToStorageKey(Box<[Id]>),
+      "add_noofl" = AddNoofl(Box<[Id]>),
+      "add_must_ofl" = AddMustOfl(Box<[Id]>),
+      "mul_noofl" = MulNoofl(Box<[Id]>),
+      "disjoint_sighashes" = DisjointSighashes(Box<[Id]>),
+      "from_skey" = FromSkey(Box<[Id]>),
+      "to_skey" = ToSkey(Box<[Id]>),
 
       Num(WrappedU256),
       Var(egg::Symbol),
@@ -136,6 +157,27 @@ pub fn eval_evm(
       EVM::BWNot(_) => evm_ops::not(first?),
       EVM::Exp(_) => evm_ops::exp(first?, second?),
       EVM::Apply(_) => None?,
-      EVM::SafeMathNarrow(_) => None?
+
+      EVM::SafeMathNarrow(_) => None?,
+      EVM::SafeMathPromotion(_) => None?,
+      EVM::SmulNoOflUdfl(_) => None?,
+      EVM::SmulNoofl(_) => None?,
+      EVM::SmulNoudfl(_) => None?,
+      EVM::DisjointSighashes(_) => None?,
+      EVM::MulNoofl(_) => None?,
+      EVM::AddMustOfl(_) => None?,
+      EVM::AddNoofl(_) => None?,
+      EVM::SkeyAdd(_) => None?,
+      EVM::SkeyBasic(_) => None?,
+      EVM::Hash(_) => None?,
+      EVM::LinkLibrary(_) => None?,
+      EVM::OpaqueIdentity(_) => None?,
+      EVM::Ecrecover(_) => None?,
+      EVM::WrapTwosComplement(_) => None?,
+      EVM::UnwrapTwosComplement(_) => None?,
+      EVM::ToSkey(_) => None?,
+      EVM::FromSkey(_) => None?,
+      EVM::ToStorageKey(_) => None?,
+
   })
 }
