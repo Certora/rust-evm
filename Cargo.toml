@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 primitive-types = "0.10.1"
-egg = "0.7.1"
+egg = "0.9.5"
 
 
 #[dependencies.egg]
