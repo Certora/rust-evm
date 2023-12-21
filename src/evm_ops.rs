@@ -1,7 +1,7 @@
 use primitive_types::U256;
 use crate::evm_utils::{I256};
 
-// Select functions from the evm_core rust library
+// Select functions from the evm_core rust library: https://github.com/rust-ethereum/evm/blob/master/interpreter/src/eval
 
 #[inline]
 pub fn exp(op1: U256, op2: U256) -> U256 {
